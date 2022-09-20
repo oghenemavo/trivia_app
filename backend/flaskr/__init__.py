@@ -105,6 +105,44 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.
     """
 
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        body = request.get_json()
+
+        new_category = body.get('category', None)
+        new_difficulty = body.get('difficulty', None)
+        new_question = body.get('question', None)
+        new_answer = body.get('answer', None)
+
+        try:
+            question = Question(
+                category=new_category,
+                difficulty=new_difficulty,
+                question=new_question,
+                answer=new_answer,
+            )
+            question.insert()
+
+            # selection = Question.query.order_by(Book.id).all()
+            # current_books = paginate_books(request, selection)
+
+            return jsonify(
+                {
+                    'status': True,
+                    'message': 'New Question added successfully',
+                    'data': {
+                        'id': question.id,
+                        'question': question.question,
+                        'answer': question.answer,
+                        'category': question.category,
+                        'difficulty': question.difficulty
+                    }
+                }
+            )
+
+        except:
+            abort(422)
+
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
@@ -158,25 +196,25 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(error):
         return (
-            jsonify({"status": False, "error": 404, "message": "resource not found"}),
+            jsonify({'status': False, 'error': 404, 'message': 'resource not found'}),
             404,
         )
 
     @app.errorhandler(422)
     def unprocessable(error):
         return (
-            jsonify({"status": False, "error": 422, "message": "unprocessable"}),
+            jsonify({'status': False, 'error': 422, 'message': 'unprocessable'}),
             422,
         )
 
     @app.errorhandler(400)
     def bad_request(error):
-        return jsonify({"status": False, "error": 400, "message": "bad request"}), 400
+        return jsonify({'status': False, 'error': 400, 'message': 'bad request'}), 400
 
     @app.errorhandler(405)
     def not_found(error):
         return (
-            jsonify({"status": False, "error": 405, "message": "method not allowed"}),
+            jsonify({'status': False, 'error': 405, 'message': 'method not allowed'}),
             405,
         )
 
