@@ -109,7 +109,7 @@ def create_app(test_config=None):
                 {
                     "success": True,
                     "deleted": question_id,
-                    "books": current_question,
+                    "data": current_question,
                 }
             )
 
