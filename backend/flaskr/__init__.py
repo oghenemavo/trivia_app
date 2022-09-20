@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
@@ -124,6 +124,18 @@ def create_app(test_config=None):
     categories in the left column will cause only questions of that
     category to be shown.
     """
+    @app.route('/categories/<int:category_id>/questions')
+    def get_category_questions(category_id):
+        questions = db.session.query(Question).join(Category, Category.id == Question.category
+        ).filter(Question.category == category_id).group_by(Question.id).all()
+        data = paginate_questions(request, questions)
+        print(data)
+
+        return jsonify({
+            'status': True,
+            'message': 'Fetched Questions Successfully',
+            'data': data
+        })
 
     """
     @TODO:

@@ -6,6 +6,10 @@ GET http://127.0.0.1:5000/questions?page=1 HTTP/1.1
 
 ###
 
+GET http://127.0.0.1:5000/categories/1/questions HTTP/1.1
+
+###
+
 # POST https://example.com/comments HTTP/1.1
 # content-type: application/json
 
