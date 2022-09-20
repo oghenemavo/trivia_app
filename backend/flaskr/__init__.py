@@ -1,4 +1,5 @@
 import os
+from unicodedata import category
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
@@ -34,9 +35,15 @@ def create_app(test_config=None):
     for all available categories.
     """
     # @cross_origin()
-    # @app.route('/')
-    # def home():
-    #     return 'works'
+    @app.route('/categories')
+    def get_categories():
+        categories = Category.query.all()
+        data = [category.format() for category in categories]
+        return jsonify({
+            'status': True,
+            'message': 'Fetched Categories Successfully',
+            'data': data
+        })
 
 
     """
