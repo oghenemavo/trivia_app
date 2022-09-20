@@ -2,7 +2,7 @@ GET http://127.0.0.1:5000/categories HTTP/1.1
 
 ###
 
-GET http://127.0.0.1:5000/questions?page=1 HTTP/1.1
+GET http://127.0.0.1:5000/questions?page=3 HTTP/1.1
 
 ###
 
@@ -19,3 +19,7 @@ content-type: application/json
     "category": "1",
     "difficulty": "2"
 }
+
+###
+
+DELETE http://127.0.0.1:5000/questions/25 HTTP/1.1
