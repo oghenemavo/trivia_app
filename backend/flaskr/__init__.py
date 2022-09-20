@@ -172,6 +172,32 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route('/questions/search', methods=['POST'])
+    def search_question():
+        body = request.get_json()
+
+        search = body.get('search', None)
+
+        try:
+            if search:
+                selection = Question.query.order_by(Question.id).filter(
+                    Question.question.ilike("%{}%".format(search))
+                )
+                current_questions = paginate_questions(request, selection)
+
+                return jsonify(
+                    {
+                        'status': True,
+                        'message': 'Questions fetched Successfully',
+                        'data': current_questions,
+                    }
+                )
+
+            else:
+                abort(404)
+
+        except:
+            abort(422)
 
     """
     @TODO:
