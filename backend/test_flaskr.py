@@ -14,7 +14,7 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = 'trivia'
+        self.database_name = 'trivia_test'
         self.username = 'postgres'
         self.password = 'root'
         self.host_address = 'localhost'
