@@ -79,11 +79,9 @@ def create_app(test_config=None):
         return jsonify({
             'status': True,
             'message': 'Fetched Questions Successfully',
-            'data': {
-                'questions': data,
-                'total_questions': len(data),
-                'categories': categories_data
-            }
+            'questions': data,
+            'total_questions': len(data),
+            'categories': categories_data
         })
 
     """
