@@ -1,13 +1,16 @@
+from dotenv import load_dotenv
 import os
 from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-database_name = 'trivia'
-username = 'postgres'
-password = 'root'
-host_address = 'localhost'
-port = '5432'
+load_dotenv()
+
+database_name = os.environ.get('DB_NAME')
+username = os.environ.get('DB_USER')
+password = os.environ.get('DB_PASSWORD')
+host_address = os.environ.get('HOST_ADDRESS')
+port = os.environ.get('PORT')
 
 database_path = "postgresql://{}:{}@{}:{}/{}".format(username, password, host_address, port, database_name)
 
