@@ -4,6 +4,7 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 import random
+from random import randint
 
 from models import setup_db, Question, Category, db
 
@@ -14,7 +15,7 @@ def paginate_questions(request, selection):
     start = (page - 1) * QUESTIONS_PER_PAGE
     end = start + QUESTIONS_PER_PAGE
 
-    questions = [question.format()['question'] for question in selection]
+    questions = [question.format() for question in selection]
 
     return questions[start:end]
 
@@ -51,7 +52,7 @@ def create_app(test_config=None):
         return jsonify({
             'status': True,
             'message': 'Fetched Categories Successfully',
-            'data': data
+            'categories': data
         })
 
 
@@ -80,7 +81,7 @@ def create_app(test_config=None):
             'status': True,
             'message': 'Fetched Questions Successfully',
             'questions': data,
-            'total_questions': len(data),
+            'total_questions': len(questions),
             'categories': categories_data
         })
 
@@ -91,7 +92,7 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
-    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
     def delete_question(question_id):
         try:
             question = Question.query.filter(Question.id == question_id).one_or_none()
@@ -100,14 +101,15 @@ def create_app(test_config=None):
                 abort(404)
 
             question.delete()
+            
             selection = Question.query.order_by(Question.id).all()
             current_question = paginate_questions(request, selection)
 
             return jsonify(
                 {
-                    "success": True,
-                    "deleted": question_id,
-                    "data": current_question,
+                    'status': True,
+                    'deleted': question_id,
+                    'data': current_question,
                 }
             )
 
@@ -115,7 +117,7 @@ def create_app(test_config=None):
             abort(422)
 
     """
-    @TODO:
+    @DONE:
     Create an endpoint to POST a new question,
     which will require the question and answer text,
     category, and difficulty score.
@@ -128,40 +130,47 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def create_question():
         body = request.get_json()
-
+        
         new_category = body.get('category', None)
         new_difficulty = body.get('difficulty', None)
         new_question = body.get('question', None)
         new_answer = body.get('answer', None)
 
-        try:
-            question = Question(
-                category=new_category,
-                difficulty=new_difficulty,
-                question=new_question,
-                answer=new_answer,
-            )
-            question.insert()
+        search = body.get('searchTerm', None)
 
-            return jsonify(
-                {
-                    'status': True,
-                    'message': 'New Question added successfully',
-                    'data': {
-                        'id': question.id,
-                        'question': question.question,
-                        'answer': question.answer,
-                        'category': question.category,
-                        'difficulty': question.difficulty
+        if 'searchTerm' in body:
+            return search_question(search)
+        else:
+            try:
+                question = Question(
+                    category=new_category,
+                    difficulty=new_difficulty,
+                    question=new_question,
+                    answer=new_answer,
+                )
+                question.insert()
+
+                return jsonify(
+                    {
+                        'status': True,
+                        'message': 'New Question added successfully',
+                        'data': {
+                            'id': question.id,
+                            'question': question.question,
+                            'answer': question.answer,
+                            'category': question.category,
+                            'difficulty': question.difficulty
+                        }
                     }
-                }
-            )
+                )
 
-        except:
-            abort(422)
+            except:
+                abort(422)
+
+
 
     """
-    @TODO:
+    @DONE:
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
@@ -170,12 +179,7 @@ def create_app(test_config=None):
     only question that include that string within their question.
     Try using the word "title" to start.
     """
-    @app.route('/questions/search', methods=['POST'])
-    def search_question():
-        body = request.get_json()
-
-        search = body.get('search', None)
-
+    def search_question(search):
         try:
             if search:
                 selection = Question.query.order_by(Question.id).filter(
@@ -209,13 +213,13 @@ def create_app(test_config=None):
     def get_category_questions(category_id):
         questions = db.session.query(Question).join(Category, Category.id == Question.category
         ).filter(Question.category == category_id).group_by(Question.id).all()
+
         data = paginate_questions(request, questions)
-        print(data)
 
         return jsonify({
             'status': True,
             'message': 'Fetched Questions Successfully',
-            'data': data
+            'questions': data
         })
 
     """
@@ -229,9 +233,25 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route('/categories/<int:category_id>/questions', methods=['POST'])
+    def set_category_questions(category_id):
+        questions = db.session.query(Question).join(Category, Category.id == Question.category
+        ).filter(Question.category == category_id).group_by(Question.id).all()
+
+        total_questions = len(questions)
+        random_question_list_id = randint(0, total_questions)
+        question_list = [question.format() for question in questions]
+        random_question = question_list[random_question_list_id]
+
+        return jsonify({
+            'status': True,
+            'message': 'Fetched Random Question Successfully',
+            'question': random_question
+        })
+
 
     """
-    @TODO:
+    @DONE:
     Create error handlers for all expected errors
     including 404 and 422.
     """

@@ -2,7 +2,7 @@ GET http://127.0.0.1:5000/categories HTTP/1.1
 
 ###
 
-GET http://127.0.0.1:5000/questions?page=1 HTTP/1.1
+GET http://127.0.0.1:5000/questions HTTP/1.1
 
 ###
 
@@ -10,25 +10,29 @@ GET http://127.0.0.1:5000/categories/1/questions HTTP/1.1
 
 ###
 
+POST http://127.0.0.1:5000/categories/1/questions HTTP/1.1
+
+###
+
 POST http://127.0.0.1:5000/questions HTTP/1.1
 content-type: application/json
 
 {
-    "question": "Who invented writing?",
-    "answer": "The Sumerians",
+    "question": "How do I delete my account?",
+    "answer": "press delete",
     "category": "1",
-    "difficulty": "2"
+    "difficulty": "3"
 }
 
 ###
 
-DELETE http://127.0.0.1:5000/questions/24 HTTP/1.1
+DELETE http://127.0.0.1:5000/questions/31 HTTP/1.1
 
 ###
 
-POST http://127.0.0.1:5000/questions/search HTTP/1.1
+POST http://127.0.0.1:5000/questions HTTP/1.1
 content-type: application/json
 
 {
-    "search": "Who invented writing?"
+    "searchTerm": "Who invented writing?"
 }
