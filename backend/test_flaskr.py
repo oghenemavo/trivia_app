@@ -103,8 +103,10 @@ class TriviaTestCase(unittest.TestCase):
         # self.assertTrue(len(data['questions']))
     
     def test_play_quiz(self):
-        category_id = '1'
-        res = self.client().post('/categories/' + category_id + '/questions')
+        res = self.client().post('/quizzes', json={
+            'previous_question': 'How do I delete my account?',
+            'category': '1'
+        })
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)

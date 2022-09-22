@@ -233,21 +233,37 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-    @app.route('/categories/<int:category_id>/questions', methods=['POST'])
-    def set_category_questions(category_id):
-        questions = db.session.query(Question).join(Category, Category.id == Question.category
-        ).filter(Question.category == category_id).group_by(Question.id).all()
+    @app.route('/quizzes', methods=['POST'])
+    def get_quiz():
+        try:
+            body = request.get_json()
+            
+            previous_question = body.get('previous_question', None)
+            category_id = body.get('category', None)
 
-        total_questions = len(questions)
-        random_question_list_id = randint(0, total_questions)
-        question_list = [question.format() for question in questions]
-        random_question = question_list[random_question_list_id]
+            if (category_id == 'all'):
+                questions = db.session.query(Question).all()
+            else:
+                questions = db.session.query(Question).join(Category, Category.id == Question.category
+                ).filter(Question.category == category_id).group_by(Question.id).all()
 
-        return jsonify({
-            'status': True,
-            'message': 'Fetched Random Question Successfully',
-            'question': random_question
-        })
+            total_questions = len(questions)
+            if (total_questions > 0):
+                random_question_list_id = randint(1, total_questions)
+                question_list = [question.format() for question in questions]
+                random_question = question_list[random_question_list_id]
+            else:
+                abort(404)
+
+            return jsonify({
+                'status': True,
+                'message': 'Fetched Random Question Successfully',
+                'question': random_question
+            })
+
+        except:
+            abort(422)
+
 
 
     """
