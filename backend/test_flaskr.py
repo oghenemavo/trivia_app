@@ -6,6 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
 from models import setup_db, Question, Category
 
+import random
+from random import randint
+
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -74,15 +77,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data['categories']))
 
     def test_delete_question(self):
-        question_id = '30'
+        questions_list = Question.query.all()
+        fetched_questions = [question.format() for question in questions_list]
+        question_id = str(fetched_questions[0]['id'])
+
         res = self.client().delete('/questions/' + question_id)
         data = json.loads(res.data)
 
         question = Question.query.filter(Question.id == question_id).one_or_none()
 
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['status'], True)
-        self.assertEqual(question, None)
+        if question_id is None:
+            self.assertEqual(res.status_code, 422)
+        else:
+            self.assertEqual(res.status_code, 200)
+            self.assertEqual(data['status'], True)
+            self.assertEqual(question, None)
 
     def test_create_new_question(self):
         res = self.client().post('/questions', json=self.new_question)
@@ -95,10 +104,11 @@ class TriviaTestCase(unittest.TestCase):
     
     def test_play_quiz(self):
         category_id = '1'
-        res = self.client().get('/categories/' + category_id + '/questions')
+        res = self.client().post('/categories/' + category_id + '/questions')
+        data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['status'], True)
+        self.assertTrue(data['status'])
         self.assertTrue(data['question'])
 
 
