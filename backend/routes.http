@@ -6,7 +6,7 @@ GET http://127.0.0.1:5000/questions HTTP/1.1
 
 ###
 
-GET http://127.0.0.1:5000/categories/1/questions HTTP/1.1
+GET http://127.0.0.1:5000/categories/2/questions HTTP/1.1
 
 ###
 
@@ -14,8 +14,8 @@ POST http://127.0.0.1:5000/quizzes HTTP/1.1
 content-type: application/json
 
 {
-    "previous_question": "How do I delete my account?",
-    "category": "5"
+    "previous_question": [18, 16, 17],
+    "category": "Art"
 }
 
 

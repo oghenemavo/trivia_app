@@ -48,7 +48,13 @@ def create_app(test_config=None):
     @app.route('/categories')
     def get_categories():
         categories = Category.query.all()
-        data = [category.format() for category in categories]
+        # data = [category.format() for category in categories]
+        data = {}
+        # for key, value in :
+        for category in categories:
+            data[category.id] = category.type
+
+
         return jsonify({
             'status': True,
             'message': 'Fetched Categories Successfully',
@@ -72,7 +78,11 @@ def create_app(test_config=None):
     @app.route('/questions')
     def get_questions():
         categories = Category.query.all()
-        categories_data = [category.format() for category in categories]
+        categories_data = {}
+        current_category = ''
+        for category in categories:
+            categories_data[category.id] = category.type
+            current_category = category.type
 
         questions = Question.query.all()
         data = paginate_questions(request, questions)
@@ -81,8 +91,9 @@ def create_app(test_config=None):
             'status': True,
             'message': 'Fetched Questions Successfully',
             'questions': data,
-            'total_questions': len(questions),
-            'categories': categories_data
+            'totalQuestions': len(questions),
+            'categories': categories_data,
+            'currentCategory': current_category
         })
 
     """
@@ -101,15 +112,12 @@ def create_app(test_config=None):
                 abort(404)
 
             question.delete()
-            
-            selection = Question.query.order_by(Question.id).all()
-            current_question = paginate_questions(request, selection)
 
             return jsonify(
                 {
                     'status': True,
+                    'message': 'Questions Deleted Successfully',
                     'deleted': question_id,
-                    'data': current_question,
                 }
             )
 
@@ -154,13 +162,6 @@ def create_app(test_config=None):
                     {
                         'status': True,
                         'message': 'New Question added successfully',
-                        'data': {
-                            'id': question.id,
-                            'question': question.question,
-                            'answer': question.answer,
-                            'category': question.category,
-                            'difficulty': question.difficulty
-                        }
                     }
                 )
 
@@ -187,11 +188,16 @@ def create_app(test_config=None):
                 )
                 current_questions = paginate_questions(request, selection)
 
+                category_id = selection[0].category
+                categoryObject = db.session.query(Category).filter_by(id=category_id).first()
+
                 return jsonify(
                     {
                         'status': True,
                         'message': 'Questions fetched Successfully',
-                        'data': current_questions,
+                        'questions': current_questions,
+                        'totalQuestions': len(current_questions),
+                        'currentCategory': categoryObject.type
                     }
                 )
 
@@ -211,6 +217,8 @@ def create_app(test_config=None):
     """
     @app.route('/categories/<int:category_id>/questions')
     def get_category_questions(category_id):
+        category = db.session.query(Category).filter_by(id=category_id).first()
+
         questions = db.session.query(Question).join(Category, Category.id == Question.category
         ).filter(Question.category == category_id).group_by(Question.id).all()
 
@@ -219,7 +227,9 @@ def create_app(test_config=None):
         return jsonify({
             'status': True,
             'message': 'Fetched Questions Successfully',
-            'questions': data
+            'questions': data,
+            'totalQuestions': len(questions),
+            'currentCategory': category.type
         })
 
     """
@@ -238,33 +248,49 @@ def create_app(test_config=None):
         try:
             body = request.get_json()
             
-            previous_question = body.get('previous_question', None)
-            category_id = body.get('category', None)
+            previous_question_ids = body.get('previous_question', None)
+            category_type = body.get('category', None)
 
-            if (category_id == 'all'):
-                questions = db.session.query(Question).all()
-            else:
-                questions = db.session.query(Question).join(Category, Category.id == Question.category
-                ).filter(Question.category == category_id).group_by(Question.id).all()
+            question = {}
 
-            total_questions = len(questions)
-            if (total_questions > 0):
-                random_question_list_id = randint(1, total_questions)
-                question_list = [question.format() for question in questions]
-                random_question = question_list[random_question_list_id]
+            if (category_type == 'All'):
+                result = db.session.query(Question).all()
+                if (len(result) > 0):
+                    random_question_list_id = randint(0, len(result))
+                    question_list = [question.format() for question in result]
+                    question = question_list[random_question_list_id]
+                else:
+                    abort(404)
             else:
-                abort(404)
+                category_questions = db.session.query(Question).join(Category, Category.id == Question.category
+                ).filter(Category.type == category_type).group_by(Question.id).all()
+
+                all = []
+                question_list = {}
+                
+                for cat in category_questions:
+                    all.append(cat.id)
+                    question_list[cat.id] = cat
+
+                for id in all:
+                    if (id not in previous_question_ids):
+                        result = question_list[id]
+                        question = {
+                            'id': result.id,
+                            'category': result.category,
+                            'difficulty': result.difficulty,
+                            'question': result.question,
+                            'answer': result.answer
+                        }
 
             return jsonify({
                 'status': True,
                 'message': 'Fetched Random Question Successfully',
-                'question': random_question
+                'question': question
             })
 
         except:
             abort(422)
-
-
 
     """
     @DONE:
