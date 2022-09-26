@@ -15,7 +15,7 @@ content-type: application/json
 
 {
     "previous_question": [18, 16, 17],
-    "category": "Science"
+    "category": "Entertainment"
 }
 
 

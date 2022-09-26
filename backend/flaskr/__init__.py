@@ -87,6 +87,9 @@ def create_app(test_config=None):
         questions = Question.query.all()
         data = paginate_questions(request, questions)
 
+        if len(data) == 0:
+            abort(404)
+
         return jsonify({
             'status': True,
             'message': 'Fetched Questions Successfully',
@@ -224,6 +227,9 @@ def create_app(test_config=None):
 
         data = paginate_questions(request, questions)
 
+        if len(data) == 0:
+            abort(404)
+
         return jsonify({
             'status': True,
             'message': 'Fetched Questions Successfully',
@@ -280,13 +286,15 @@ def create_app(test_config=None):
                             'answer': result.answer
                         }
 
-            question = question
+            if len(question) > 0:
+                return jsonify({
+                    'status': True,
+                    'message': 'Fetched Random Question Successfully',
+                    'question': question
+                })
 
-            return jsonify({
-                'status': True,
-                'message': 'Fetched Random Question Successfully',
-                'question': question
-            })
+            abort(422)
+
 
         except:
             abort(422)
