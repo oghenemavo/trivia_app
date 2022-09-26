@@ -252,11 +252,11 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def get_quiz():
         body = request.get_json()
-        previous_question_ids = body.get('previous_question', None)
-        category_type = body.get('category', None)
+        previous_question_ids = body.get('previous_questions', None)
+        category_type = body.get('quiz_category', None)
 
         try:
-            if (category_type == 'All'):
+            if (category_type['type'] == 'click'):
                 result = db.session.query(Question).all()
                 if (len(result) > 0):
                     random_question_list_id = randint(0, len(result))
@@ -265,7 +265,7 @@ def create_app(test_config=None):
             else:
                 category_questions = db.session.query(Question).join(
                     Category, Question.category == Category.id
-                ).filter(Category.type == category_type).all()
+                ).filter(Category.type == category_type['type']).all()
 
                 questions_id = []
                 question_list = question = {}

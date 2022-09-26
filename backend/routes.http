@@ -14,8 +14,8 @@ POST http://127.0.0.1:5000/quizzes HTTP/1.1
 content-type: application/json
 
 {
-    "previous_question": [18, 16, 17],
-    "category": "Entertainment"
+    "previous_questions": [18, 16, 17],
+    "quiz_category": "Entertainment"
 }
 
 

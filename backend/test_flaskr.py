@@ -142,8 +142,8 @@ class TriviaTestCase(unittest.TestCase):
     
     def test_play_quiz(self):
         payload = {
-            'previous_question': [18, 16, 17],
-            'category': 'Science'
+            'previous_questions': [18, 16, 17],
+            'quiz_category': 'Science'
         }
         res = self.client().post('/quizzes', json=payload)
         data = json.loads(res.data)
@@ -153,8 +153,8 @@ class TriviaTestCase(unittest.TestCase):
     
     def test_play_quiz_invalid_category(self):
         payload = {
-            'previous_question': [18, 16, 17],
-            'category': 'Geography'
+            'previous_questions': [18, 16, 17],
+            'quiz_category': 'Geography'
         }
         res = self.client().post('/quizzes', json=payload)
         data = json.loads(res.data)
