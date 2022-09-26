@@ -245,36 +245,33 @@ def create_app(test_config=None):
     """
     @app.route('/quizzes', methods=['POST'])
     def get_quiz():
+        body = request.get_json()
+        previous_question_ids = body.get('previous_question', None)
+        category_type = body.get('category', None)
+
         try:
-            body = request.get_json()
-            
-            previous_question_ids = body.get('previous_question', None)
-            category_type = body.get('category', None)
-
-            question = {}
-
             if (category_type == 'All'):
                 result = db.session.query(Question).all()
                 if (len(result) > 0):
                     random_question_list_id = randint(0, len(result))
                     question_list = [question.format() for question in result]
                     question = question_list[random_question_list_id]
-                else:
-                    abort(404)
             else:
-                category_questions = db.session.query(Question).join(Category, Category.id == Question.category
-                ).filter(Category.type == category_type).group_by(Question.id).all()
+                category_questions = db.session.query(Question).join(
+                    Category, Question.category == Category.id
+                ).filter(Category.type == category_type).all()
 
-                all = []
-                question_list = {}
-                
-                for cat in category_questions:
-                    all.append(cat.id)
-                    question_list[cat.id] = cat
+                questions_id = []
+                question_list = question = {}
 
-                for id in all:
+                for val in category_questions:
+                    questions_id.append(val.id)
+                    question_list[val.id] = val
+
+                for id in questions_id:
                     if (id not in previous_question_ids):
                         result = question_list[id]
+
                         question = {
                             'id': result.id,
                             'category': result.category,
@@ -282,6 +279,8 @@ def create_app(test_config=None):
                             'question': result.question,
                             'answer': result.answer
                         }
+
+            question = question
 
             return jsonify({
                 'status': True,
@@ -291,6 +290,7 @@ def create_app(test_config=None):
 
         except:
             abort(422)
+
 
     """
     @DONE:
